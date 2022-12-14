@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include "Optics.h"
 
 class DeliveryCompany {
@@ -8,7 +9,7 @@ class DeliveryCompany {
 	std::string name;
 	std::string address;
 	std::string phone_number;
-	std::vector<Optics*> deliverables;
+	std::unordered_map<int, float> deliverables;
 
 	DeliveryCompany();
 public:
@@ -27,10 +28,9 @@ public:
 	std::string GetPhoneNumber() const;
 	void SetPhoneNumber(std::string phone_number);
 	
-	//const std::vector<Optics*>& GetDeliverables() const;
-	const std::vector<Optics*>& GetDeliverables() const;
-	bool AddDeliverable(Optics *optics);
-	Optics* RemoveDeliverable(Optics *optics);
+	const std::unordered_map<int, float>& GetDeliverables() const;
+	void AddDeliverable(int index, float price);
+	void RemoveDeliverable(int index);
 
 	bool operator==(const DeliveryCompany& rhs);
 	friend std::ostream& operator<<(std::ostream& os, const DeliveryCompany& dc);

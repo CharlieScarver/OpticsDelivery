@@ -57,6 +57,7 @@ void CommandMenu::inputFloat(std::string message, float& input, float min, float
 void CommandMenu::inputAlnumString(std::string message, std::string& input) const
 {
 	// Clear leading whitespaces
+	std::cin.clear();
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	bool repeat;
 	do {
@@ -98,32 +99,7 @@ void CommandMenu::loadFromFile()
 
 		std::string type = line.substr(0, pos);
 		std::string sub_line = line.substr(pos + 1);
-		if (type == "DeliveryCompany")
-		{
-			size_t next_pos = sub_line.find(",");
-			if (next_pos == std::string::npos) {
-				std::cout << "Skipping line \"" << line << "\" - Couldn't parse" << std::endl;
-				save_read.close();
-				return;
-			}
-			std::string bulstat = sub_line.substr(0, next_pos);
-			sub_line = sub_line.substr(next_pos + 1);
-
-			next_pos = sub_line.find(",");
-			std::string name = sub_line.substr(0, next_pos);
-			sub_line = sub_line.substr(next_pos + 1);
-
-			next_pos = sub_line.find(",");
-			std::string address = sub_line.substr(0, next_pos);
-			sub_line = sub_line.substr(next_pos + 1);
-
-			next_pos = sub_line.find(")");
-			std::string phone_number = sub_line.substr(0, next_pos);
-
-			DeliveryCompany *company = new DeliveryCompany(bulstat, name, address, phone_number);
-			this->companies.push_back(company);
-		}
-		else if (type == "Optics")
+		if (type == "Optics")
 		{
 			size_t next_pos = sub_line.find(",");
 			if (next_pos == std::string::npos) {
@@ -142,20 +118,61 @@ void CommandMenu::loadFromFile()
 			float diopter = std::stof(sub_line.substr(0, next_pos));
 			sub_line = sub_line.substr(next_pos + 1);
 
-			next_pos = sub_line.find(",");
+			next_pos = sub_line.find(")");
 			std::string material = sub_line.substr(0, next_pos);
+
+			Optics *optics = new Optics(opt_type, thickness, diopter, material);
+			this->optics.push_back(optics);
+		}
+		else if (type == "DeliveryCompany")
+		{
+			size_t next_pos = sub_line.find(",");
+			if (next_pos == std::string::npos) {
+				std::cout << "Skipping line \"" << line << "\" - Couldn't parse" << std::endl;
+				save_read.close();
+				return;
+			}
+			std::string bulstat = sub_line.substr(0, next_pos);
 			sub_line = sub_line.substr(next_pos + 1);
 
-			next_pos = sub_line.find(")");
-			float price = std::stof(sub_line.substr(0, next_pos));
+			next_pos = sub_line.find(",");
+			std::string name = sub_line.substr(0, next_pos);
+			sub_line = sub_line.substr(next_pos + 1);
 
-			Optics *optics = new Optics(opt_type, thickness, diopter, material, price);
-			this->optics.push_back(optics);
+			next_pos = sub_line.find(",");
+			std::string address = sub_line.substr(0, next_pos);
+			sub_line = sub_line.substr(next_pos + 1);
+
+			next_pos = sub_line.find(",[");
+			std::string phone_number = sub_line.substr(0, next_pos);
+			sub_line = sub_line.substr(next_pos + 2);
+
+			DeliveryCompany* company = new DeliveryCompany(bulstat, name, address, phone_number);
+
+			next_pos = sub_line.find(":");
+			while (next_pos != std::string::npos)
+			{
+				int index = std::stoi(sub_line.substr(0, next_pos));
+				sub_line = sub_line.substr(next_pos + 1);
+
+				next_pos = sub_line.find(",");
+				float price = std::stof(sub_line.substr(0, next_pos));
+				sub_line = sub_line.substr(next_pos + 1);
+
+				if (index >= 0 && index < this->optics.size())
+				{
+					company->AddDeliverable(index, price);
+				}
+
+				next_pos = sub_line.find(":");
+			}
+
+			this->companies.push_back(company);
 		}
 	}
 
 	save_read.close();
-	std::cout << "Save file loaded successfully" << std::endl;
+	std::cout << "Save file loaded successfully" << std::endl << std::endl;
 }
 
 void CommandMenu::saveToFile() const
@@ -167,11 +184,9 @@ void CommandMenu::saveToFile() const
 	std::ifstream save_read;
 	std::ofstream save_write;
 
-	// Make sure the file exists
+	// Make sure the save file exists
 	save_write.open(SAVE_FILE, std::ios_base::out);
 	save_write.close();
-
-	save_read.open(SAVE_FILE, std::ios_base::in);
 
 	if (save_read.fail()) {
 		std::cout << "Error opening save file!" << std::endl;
@@ -201,11 +216,11 @@ void CommandMenu::saveToFile() const
 
 	// Write the current state to the save file
 	save_write.open(SAVE_FILE, std::ios_base::out);
-	for (auto it = this->companies.begin(); it != this->companies.end(); it++)
+	for (auto it = this->optics.begin(); it != this->optics.end(); it++)
 	{
 		save_write << *(*it) << std::endl;
 	}
-	for (auto it = this->optics.begin(); it != this->optics.end(); it++)
+	for (auto it = this->companies.begin(); it != this->companies.end(); it++)
 	{
 		save_write << *(*it) << std::endl;
 	}
@@ -228,6 +243,23 @@ void CommandMenu::commandAddCompany()
 	inputAlnumString("Enter phone_number (alphanumeric string): ", phone_number);
 
 	DeliveryCompany* delivery_comp = new DeliveryCompany(bulstat, name, address, phone_number);
+
+	std::string confirm;
+	float choice;
+	do {
+		this->commandListOptics();
+
+		inputFloat("Choose an optics piece that this company delivers (integer): ", choice, 0, this->optics.size());
+		int index = (int)choice;
+		Optics* opt = this->optics[index];
+
+		inputFloat("Enter the price for that optics piece (float): ", choice, 0, 99999);
+
+		delivery_comp->AddDeliverable(index, choice);
+
+		inputAlnumString("Do you want to add more optics to this company's deliverables? (y/n)", confirm);
+	} while (confirm == "y");
+
 	this->companies.push_back(delivery_comp);
 }
 
@@ -238,15 +270,13 @@ void CommandMenu::commandAddOptics()
 	float thickness;
 	float diopter;
 	std::string material;
-	float price;
 
 	inputAlnumString("Enter type (alphanumeric string): ", type);
 	inputFloat("Enter thickness (float): ", thickness, 0, 100);
 	inputFloat("Enter diopter (float): ", diopter, -100, 100);
 	inputAlnumString("Enter material (alphanumeric string): ", material);
-	inputFloat("Enter price (float): ", price, 0, 99999);
 
-	Optics* optics = new Optics(type, thickness, diopter, material, price);
+	Optics* optics = new Optics(type, thickness, diopter, material);
 	this->optics.push_back(optics);
 }
 
@@ -258,6 +288,7 @@ void CommandMenu::commandListCompanies() const
 	{
 		std::cout << "[" << i << "] = " << *(*it) << std::endl;
 	}
+	std::cout << std::endl;
 }
 
 void CommandMenu::commandListOptics() const
@@ -268,6 +299,7 @@ void CommandMenu::commandListOptics() const
 	{
 		std::cout << "[" << i << "] = " << *(*it) << std::endl;
 	}
+	std::cout << std::endl;
 }
 
 void CommandMenu::commandPlaceOrder() const
@@ -276,16 +308,26 @@ void CommandMenu::commandPlaceOrder() const
 	this->commandListCompanies();
 	inputFloat("Choose a delivery company from the list (integer): ", choice, 0, this->companies.size());
 	DeliveryCompany* company = this->companies[choice];
+	auto deliverables = company->GetDeliverables();
 
 	std::string confirm;
 	std::vector<Optics*> order;
+	std::vector<int> order_indexes;
 	float price_total = 0;
 	do {
-		this->commandListOptics();
-		inputFloat("Choose optics to buy from the list (integer): ", choice, 0, this->optics.size());
-		Optics* opt = this->optics[choice];
+		std::cout << std::endl << "===== List all optics pieces delivered by this company =====" << std::endl;
+		for (auto it = deliverables.begin(); it != deliverables.end(); it++)
+		{
+			Optics* opti = this->optics[it->first];
+			std::cout << "[" << it->first << "] = " << *opti << std::endl;
+		}
+
+		inputFloat("Choose an optics piece to buy from the list (integer): ", choice, 0, this->optics.size());
+		int index = (int)choice;
+		Optics* opt = this->optics[index];
 		order.push_back(opt);
-		price_total += opt->GetPrice();
+		order_indexes.push_back(index);
+		price_total += deliverables.at(index);
 
 		inputAlnumString("Do you want to add more optics to the order? (y/n)", confirm);
 	} while (confirm == "y");
@@ -299,7 +341,7 @@ void CommandMenu::commandPlaceOrder() const
 	{
 		Optics* op = *it;
 		std::cout << "\t" << i << ". " << op->GetType() << "\t\tThickness: " << op->GetThickness() 
-			<< "mm  Dpt: " << op->GetDiopter() << "\t\t|  Price: " << op->GetPrice() << std::endl;
+			<< "mm  Dpt: " << op->GetDiopter() << "\t\t|  Price: " << deliverables.at(order_indexes[i]) << std::endl;
 	}
 	std::cout << "------------" << std::endl;
 	std::cout << "Total: " << price_total << std::endl << std::endl;

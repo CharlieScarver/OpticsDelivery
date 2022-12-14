@@ -1,6 +1,7 @@
 #include "DeliveryCompany.h"
 #include <iostream> // operator<< 
 #include <algorithm>
+#include <iomanip> // std::setprecision(2)
 
 DeliveryCompany::DeliveryCompany(std::string bulstat, std::string name, std::string address, std::string phone_number)
 {
@@ -58,36 +59,19 @@ void DeliveryCompany::SetPhoneNumber(std::string phone_number)
 	this->phone_number = phone_number;
 }
 //const std::vector<Optics*>& DeliveryCompany::GetDeliverables() const
-const std::vector<Optics*>& DeliveryCompany::GetDeliverables() const
+const std::unordered_map<int, float>& DeliveryCompany::GetDeliverables() const
 {
 	return this->deliverables;
 }
 
-bool DeliveryCompany::AddDeliverable(Optics* optics)
+void DeliveryCompany::AddDeliverable(int index, float price)
 {
-	auto it = std::find(this->deliverables.begin(), this->deliverables.end(), optics);
-	// If item is not found, add it
-	if (it == this->deliverables.end())
-	{
-		this->deliverables.push_back(optics);
-		return true;
-	}
-
-	return false;
+	this->deliverables.emplace(index, price);
 }
 
-Optics* DeliveryCompany::RemoveDeliverable(Optics* optics)
+void DeliveryCompany::RemoveDeliverable(int index)
 {
-	Optics* item = nullptr;
-	auto it = std::find(this->deliverables.begin(), this->deliverables.end(), optics);
-	// If item is found, remove it
-	if (it != this->deliverables.end())
-	{
-		item = *it;
-		this->deliverables.erase(it);
-	}
-
-	return item;
+	this->deliverables.erase(index);
 }
 
 bool DeliveryCompany::operator==(const DeliveryCompany& rhs)
@@ -100,9 +84,21 @@ bool DeliveryCompany::operator==(const DeliveryCompany& rhs)
 
 std::ostream& operator<<(std::ostream& os, const DeliveryCompany& dc)
 {
-	return os << "DeliveryCompany("
+	os << std::fixed << std::setprecision(2)
+		<< "DeliveryCompany("
 		<< dc.bulstat << ","
 		<< dc.name << ","
 		<< dc.address << ","
-		<< dc.phone_number << ")";
+		<< dc.phone_number << ",[";
+
+	for (auto it = dc.deliverables.begin(); it != dc.deliverables.end(); it++)
+	{
+		if (it != dc.deliverables.begin())
+		{
+			os << ",";
+		}
+		os << it->first << ":" << it->second;
+	}
+
+	return os << "])";
 }
