@@ -24,6 +24,9 @@
     <ClCompile Include="DeliveryCompany.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CommandMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Optics.h">
@@ -32,5 +35,12 @@
     <ClInclude Include="DeliveryCompany.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommandMenu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="backup.txt" />
+    <Text Include="save_file.txt" />
   </ItemGroup>
 </Project>

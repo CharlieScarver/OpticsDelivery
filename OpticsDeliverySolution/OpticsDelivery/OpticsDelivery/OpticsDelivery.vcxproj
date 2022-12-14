@@ -107,7 +107,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,13 +127,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommandMenu.cpp" />
     <ClCompile Include="DeliveryCompany.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Optics.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandMenu.h" />
     <ClInclude Include="DeliveryCompany.h" />
     <ClInclude Include="Optics.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="backup.txt" />
+    <Text Include="save_file.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

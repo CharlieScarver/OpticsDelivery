@@ -1,12 +1,13 @@
 #include "Optics.h"
 #include <iostream> // operator<< 
 
-Optics::Optics(std::string type, float thickness, float diopter, std::string material)
+Optics::Optics(std::string type, float thickness, float diopter, std::string material, float price)
 {
 	this->type = type;
 	this->thickness = thickness;
 	this->diopter = diopter;
 	this->material = material;
+	this->price = price;
 }
 
 Optics::Optics(const Optics& o)
@@ -15,11 +16,12 @@ Optics::Optics(const Optics& o)
 	this->thickness = o.thickness;
 	this->diopter = o.diopter;
 	this->material = o.material;
+	this->price = price;
 }
 
 std::string Optics::GetType()
 {
-	return std::string();
+	return this->type;
 }
 
 void Optics::SetType(std::string type)
@@ -57,6 +59,16 @@ void Optics::SetMaterial(std::string material)
 	this->material = material;
 }
 
+float Optics::GetPrice() const
+{
+	return this->price;
+}
+
+void Optics::SetPrice(float price)
+{
+	this->price = price;
+}
+
 bool Optics::operator==(const Optics& rhs)
 {
 	return this->type == rhs.type &&
@@ -70,6 +82,7 @@ std::ostream& operator<<(std::ostream& os, const Optics& opt)
 	return os << "Optics("
 		<< opt.type << ","
 		<< opt.thickness << ","
-		<< opt.diopter << ", "
-		<< opt.material << ")";
+		<< opt.diopter << ","
+		<< opt.material << ","
+		<< opt.price << ")";
 }

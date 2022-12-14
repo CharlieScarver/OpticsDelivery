@@ -7,10 +7,11 @@ private:
 	float thickness;
 	float diopter;
 	std::string material;
+	float price;
 
 	Optics();
 public:
-	Optics(std::string type, float thickness, float diopter, std::string material);
+	Optics(std::string type, float thickness, float diopter, std::string material, float price);
 	Optics(const Optics &o);
 
 	std::string GetType();
@@ -24,6 +25,9 @@ public:
 
 	std::string GetMaterial();
 	void SetMaterial(std::string material);
+
+	float GetPrice() const;
+	void SetPrice(float price);
 
 	bool operator==(const Optics& rhs);
 	friend std::ostream& operator<<(std::ostream& os, const Optics& opt);
